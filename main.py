@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import pytesseract
+import easyocr  # Replace pytesseract with easyocr
 from PIL import Image
 import re
 import csv
@@ -32,10 +32,14 @@ def verify_user(username, password):
                 return True
     return False
 
-# Function to extract text from images
+# Function to extract text from images using EasyOCR
 def extract_text_from_image(image):
-    # Use Tesseract to extract text from the image
-    text = pytesseract.image_to_string(image)
+    # Use EasyOCR to extract text from the image
+    reader = easyocr.Reader(['en'])  # Set language to English
+    result = reader.readtext(image)
+    
+    # Join the recognized text into a single string
+    text = ' '.join([res[1] for res in result])
     return text
 
 # Function to match extracted text with medicine names in dataset
