@@ -60,7 +60,7 @@ st.title("Cane: A Medical Prescription Tracker")
 st.subheader("Designed to help elders and disabled individuals manage their prescriptions effortlessly.")
 
 # Add logo (ensure Cane.png is uploaded to your GitHub repo)
-st.image("Cane.png", caption="Cane: Your Trusted Prescription Manager", width=200)
+st.image("Cane.png", caption="Cane: Your Trusted Prescription Manager", width=300)
 
 # User Authentication: Sign-up or Login
 st.sidebar.title("Login/Sign-up")
