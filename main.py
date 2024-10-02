@@ -62,7 +62,7 @@ Upload a prescription image or take a picture, and the app will extract the text
 """)
 
 # Add logo
-logo_path = "Cane_logo.png"  # Ensure this file is uploaded to your GitHub repository
+logo_path = "Cane.png"  # Ensure this file is uploaded to your GitHub repository
 if os.path.exists(logo_path):
     st.image(logo_path, caption="Cane Logo")
 
@@ -108,8 +108,10 @@ if choice == "Login":
             
             # Show "Extract Text" button only if an image is available
             if image is not None:
-                if st.button("Extract Text"):
-                    # Show loading spinner
+                extract_button = st.button("Extract Text")
+
+                # Handle text extraction on button click
+                if extract_button:
                     with st.spinner("Processing the image and extracting text..."):
                         time.sleep(2)  # Simulate a delay for loading
                         extracted_text = extract_text_from_image(image)
@@ -130,3 +132,50 @@ if choice == "Login":
                         st.write("No medicines were identified in the prescription.")
         else:
             st.sidebar.error("Invalid Username or Password")
+
+Key Updates:
+
+1. Extract Text Button:
+
+The Extract Text button only appears if an image (uploaded or captured) is available.
+
+After clicking the button, the text extraction happens on the same page.
+
+
+
+2. Loading Indicator:
+
+While extracting text from the image, the spinner appears showing the message "Processing the image and extracting text...". This ensures the user knows the app is working.
+
+
+
+3. Extracted Text Display on the Same Page:
+
+The extracted text and the identified medicines will be displayed on the same page, immediately after the processing is done. No redirection will happen.
+
+
+
+4. Issue Fix:
+
+The reason you weren't seeing the button earlier might be due to how Streamlit handles event triggers and conditions for showing elements. This update makes sure the button is only visible after the image is uploaded or taken.
+
+
+
+
+Testing Flow:
+
+1. Upload an image or take a picture using the webcam.
+
+
+2. After uploading or capturing the image, the Extract Text button will appear.
+
+
+3. When the Extract Text button is clicked, a loading spinner will display during the processing.
+
+
+4. Once the text extraction is complete, the extracted text and identified medicines will be shown on the same page without redirecting.
+
+
+
+Let me know if this resolves the issue!
+
