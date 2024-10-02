@@ -5,6 +5,7 @@ from PIL import Image
 import re
 import csv
 import os
+import time  # To simulate loading
 
 # Load medicine dataset
 meds_data = pd.read_csv('meds.csv')
@@ -108,8 +109,14 @@ if choice == "Login":
             # Show "Extract Text" button only if an image is available
             if image is not None:
                 if st.button("Extract Text"):
-                    extracted_text = extract_text_from_image(image)
+                    # Show loading spinner
+                    with st.spinner("Processing the image and extracting text..."):
+                        time.sleep(2)  # Simulate a delay for loading
+                        extracted_text = extract_text_from_image(image)
                     
+                    st.success("Text extraction complete!")
+                    
+                    # Display extracted text
                     st.subheader("Extracted Text from Prescription")
                     st.write(extracted_text)
                     
