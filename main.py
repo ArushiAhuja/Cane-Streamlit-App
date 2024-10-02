@@ -9,6 +9,12 @@ import os
 # Load medicine dataset
 meds_data = pd.read_csv('meds.csv')
 
+# Add additional text below the title
+
+
+# Add the logo image
+st.image("logo.png", caption="Cane - Your health, our priority", use_column_width=True)
+
 # Function to save user data to CSV
 def save_user_data(username, password):
     if not os.path.exists('users.csv'):
@@ -53,6 +59,11 @@ def identify_medicines_in_text(text):
 
 # Streamlit app layout
 st.title("Cane: Medical Prescription Tracker")
+st.write("""
+Welcome to Cane! This web app helps elders and disabled individuals track their medical prescriptions and stay on top of their medication schedule.
+With features like PDF prescription scanning and guardian notifications, Cane aims to make medication management easier and stress-free.
+""")
+st.image("Cane.png", caption="Cane - Your health, our priority", use_column_width=True)
 
 # User Authentication: Sign-up or Login
 st.sidebar.title("Login/Sign-up")
