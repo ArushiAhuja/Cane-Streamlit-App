@@ -1,6 +1,6 @@
 streamlit
 PyPDF2
-gTTS
-scikit-learn
+pytesseract
 pandas
-numpy
+opencv-python
+Pillow
