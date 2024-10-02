@@ -7,7 +7,7 @@ import csv
 import os
 
 # Load medicine dataset
-meds_data = pd.read_csv('data/meds.csv')
+meds_data = pd.read_csv('meds.csv')
 
 # Function to save user data to CSV
 def save_user_data(username, password):
