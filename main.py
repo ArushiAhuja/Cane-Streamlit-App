@@ -6,6 +6,14 @@ import re
 import csv
 import os
 
+# Initialize session state for camera and text extraction
+if 'camera_opened' not in st.session_state:
+    st.session_state['camera_opened'] = False
+if 'captured_image' not in st.session_state:
+    st.session_state['captured_image'] = None
+if 'extracted_text' not in st.session_state:
+    st.session_state['extracted_text'] = None
+
 # Load medicine dataset
 meds_data = pd.read_csv('meds.csv')
 
@@ -34,33 +42,24 @@ def verify_user(username, password):
 
 # Function to extract text from images using EasyOCR
 def extract_text_from_image(image):
-    # Use EasyOCR to extract text from the image
-    reader = easyocr.Reader(['en'])  # Set language to English
+    reader = easyocr.Reader(['en'])
     result = reader.readtext(image)
-    
-    # Join the recognized text into a single string
     text = ' '.join([res[1] for res in result])
     return text
 
 # Function to match extracted text with medicine names in dataset
 def identify_medicines_in_text(text):
-    # Extract medicine names from the dataset
     medicine_names = meds_data['Name'].values
     matched_medicines = []
-    
-    # Search for each medicine name in the extracted text
     for med in medicine_names:
         if re.search(r'\b' + re.escape(med) + r'\b', text, re.IGNORECASE):
             matched_medicines.append(med)
-    
     return matched_medicines
 
 # Streamlit app layout
 st.title("Cane: Prescription Tracker")
 st.subheader("Helping you manage prescriptions. Simple, reliable, and designed for everyone.")
 
-# Add logo below title and subtitle, taking up full width
-st.markdown("<br>", unsafe_allow_html=True)  # Add space below subtitle
 st.image("Cane.png", caption="Cane: Your Prescription Manager", use_column_width=True)
 
 # User Authentication: Sign-up or Login
@@ -92,30 +91,42 @@ if choice == "Login":
             st.header("Upload Your Prescription Image")
             uploaded_file = st.file_uploader("Upload an image of your prescription", type=["png", "jpg", "jpeg", "pdf"])
             
-            # Step 1: Add a button to open the camera, but only show camera when clicked
+            # Step 1: Handle the 'Take a Photo' button click
             if st.button("Take a Photo"):
-                # Show camera input when user clicks 'Take a Photo'
-                picture = st.camera_input("Camera Window")
+                st.session_state['camera_opened'] = True
 
-                # Step 2: If the user takes a picture
+            # Step 2: Show the camera if 'camera_opened' is True
+            if st.session_state['camera_opened']:
+                picture = st.camera_input("Camera Window")
+                
+                # Step 3: After taking a picture, store it in session state
                 if picture:
-                    image = Image.open(picture)
-                    st.image(image, caption="Captured Prescription", use_column_width=True)
-                    
-                    # Step 3: Extract text after picture is captured
-                    if st.button("Extract Text from Photo"):
-                        extracted_text = extract_text_from_image(image)
-                        st.subheader("Extracted Text from Prescription")
-                        st.write(extracted_text)
-                        
-                        # Identify medicines in the extracted text
-                        identified_medicines = identify_medicines_in_text(extracted_text)
-                        
-                        st.subheader("Identified Medicines")
-                        if identified_medicines:
-                            st.write(identified_medicines)
-                        else:
-                            st.write("No medicines were identified in the prescription.")
+                    st.session_state['captured_image'] = picture
+                    st.session_state['camera_opened'] = False
+
+            # Step 4: If there's a captured image, display it and show extract text button
+            if st.session_state['captured_image']:
+                image = Image.open(st.session_state['captured_image'])
+                st.image(image, caption="Captured Prescription", use_column_width=True)
+                
+                # Step 5: Extract text button and display the extracted text
+                if st.button("Extract Text from Photo"):
+                    extracted_text = extract_text_from_image(image)
+                    st.session_state['extracted_text'] = extracted_text
+
+            # Step 6: If there's extracted text, display it
+            if st.session_state['extracted_text']:
+                st.subheader("Extracted Text from Prescription")
+                st.write(st.session_state['extracted_text'])
+                
+                # Identify medicines in the extracted text
+                identified_medicines = identify_medicines_in_text(st.session_state['extracted_text'])
+                
+                st.subheader("Identified Medicines")
+                if identified_medicines:
+                    st.write(identified_medicines)
+                else:
+                    st.write("No medicines were identified in the prescription.")
 
             if uploaded_file:
                 # Process uploaded image
