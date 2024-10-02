@@ -1,9 +1,5 @@
 streamlit
-PyPDF2
 pytesseract
 pandas
-opencv-python
 Pillow
-opencv-python-headless
-streamlit-webrtc
 opencv-python-headless
