@@ -5,15 +5,11 @@ from PIL import Image
 import re
 import csv
 import os
+import cv2
+from streamlit_webrtc import webrtc_streamer  # For camera streaming
 
 # Load medicine dataset
 meds_data = pd.read_csv('meds.csv')
-
-# Add additional text below the title
-
-
-# Add the logo image
-st.image("logo.png", caption="Cane - Your health, our priority", use_column_width=True)
 
 # Function to save user data to CSV
 def save_user_data(username, password):
@@ -44,7 +40,7 @@ def extract_text_from_image(image):
     text = pytesseract.image_to_string(image)
     return text
 
-# Function to match extracted text with medicine names in dataset
+# Function to match extracted text with medicine names in the dataset
 def identify_medicines_in_text(text):
     # Extract medicine names from the dataset
     medicine_names = meds_data['Name'].values
@@ -57,13 +53,28 @@ def identify_medicines_in_text(text):
     
     return matched_medicines
 
+# Function to capture image from webcam
+def capture_image():
+    webrtc_ctx = webrtc_streamer(key="camera")
+    if webrtc_ctx.video_receiver:
+        frame = webrtc_ctx.video_receiver.get_frame()
+        img = frame.to_ndarray(format="bgr24")
+        return Image.fromarray(img)
+    return None
+
 # Streamlit app layout
 st.title("Cane: Medical Prescription Tracker")
-st.write("""
-Welcome to Cane! This web app helps elders and disabled individuals track their medical prescriptions and stay on top of their medication schedule.
-With features like PDF prescription scanning and guardian notifications, Cane aims to make medication management easier and stress-free.
+
+# Add description text
+st.markdown("""
+Welcome to Cane! This app helps elders and disabled individuals track their medical prescriptions easily. 
+Upload a prescription image or take a picture, and the app will extract the text and identify the medicines for you.
 """)
-st.image("Cane.png", caption="Cane - Your health, our priority", use_column_width=True)
+
+# Add logo
+logo_path = "Cane.png"  # Ensure this file is uploaded to your GitHub repository
+if os.path.exists(logo_path):
+    st.image(logo_path, caption="Cane Logo")
 
 # User Authentication: Sign-up or Login
 st.sidebar.title("Login/Sign-up")
@@ -91,9 +102,28 @@ if choice == "Login":
             st.header("Upload Your Prescription")
             uploaded_file = st.file_uploader("Upload a prescription image or PDF", type=["png", "jpg", "jpeg", "pdf"])
             
+            # Option to take a picture using the webcam
+            if st.button("Take a picture"):
+                image_from_camera = capture_image()
+                if image_from_camera is not None:
+                    st.image(image_from_camera, caption="Captured Image")
+                    extracted_text = extract_text_from_image(image_from_camera)
+                    
+                    st.subheader("Extracted Text from Prescription")
+                    st.write(extracted_text)
+                    
+                    identified_medicines = identify_medicines_in_text(extracted_text)
+                    st.subheader("Identified Medicines")
+                    if identified_medicines:
+                        st.write(identified_medicines)
+                    else:
+                        st.write("No medicines were identified.")
+            
             if uploaded_file is not None:
                 # Convert uploaded file to an image for Tesseract
                 image = Image.open(uploaded_file)
+                st.image(image, caption="Uploaded Prescription Image", use_column_width=True)
+                
                 extracted_text = extract_text_from_image(image)
                 
                 st.subheader("Extracted Text from Prescription")
@@ -109,4 +139,3 @@ if choice == "Login":
                     st.write("No medicines were identified in the prescription.")
         else:
             st.sidebar.error("Invalid Username or Password")
-
