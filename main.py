@@ -5,7 +5,6 @@ from PIL import Image
 import re
 import csv
 import os
-from streamlit_option_menu import option_menu
 
 # Load medicine dataset
 meds_data = pd.read_csv('meds.csv')
@@ -56,7 +55,7 @@ def identify_medicines_in_text(text):
 st.title("Cane: A Medical Prescription Tracker")
 st.subheader("Designed to help elders and disabled individuals manage their prescriptions effortlessly.")
 
-# Add logo (you need to upload your logo image in the same directory as the app)
+# Add logo (ensure Cane.png is uploaded to your GitHub repo)
 st.image("Cane.png", caption="Cane: Your Trusted Prescription Manager", width=200)
 
 # User Authentication: Sign-up or Login
@@ -100,7 +99,11 @@ if choice == "Login":
                 elif picture:
                     image = Image.open(picture)
 
+                # Ensure an image was successfully uploaded or captured
                 if image:
+                    st.image(image, caption="Uploaded Prescription", use_column_width=True)
+
+                    # Show extract button after uploading the image
                     if st.button("Extract Text"):
                         extracted_text = extract_text_from_image(image)
                         st.subheader("Extracted Text from Prescription")
@@ -116,4 +119,3 @@ if choice == "Login":
                             st.write("No medicines were identified in the prescription.")
         else:
             st.sidebar.error("Invalid Username or Password")
-
