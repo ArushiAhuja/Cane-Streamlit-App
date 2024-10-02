@@ -50,6 +50,11 @@ def identify_medicines_in_text(text):
 # Main App Code
 st.title("Cane: Medical Prescription Tracker")
 
+st.markdown("""
+**Welcome to Cane!** This app helps elders and disabled individuals track their medical prescriptions easily. 
+Upload a prescription image or take a picture, and the app will extract the text and identify the medicines for you.
+""")
+
 # Adding the logo
 logo_path = 'Cane.png'
 if os.path.exists(logo_path):
