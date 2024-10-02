@@ -92,15 +92,17 @@ if choice == "Login":
             st.header("Upload Your Prescription Image")
             uploaded_file = st.file_uploader("Upload an image of your prescription", type=["png", "jpg", "jpeg", "pdf"])
             
-            # Take a picture option: Add a button to open the camera
+            # Step 1: Add a button to open the camera, but only show camera when clicked
             if st.button("Take a Photo"):
-                # Only open the camera when this button is clicked
-                picture = st.camera_input("Take a picture")
+                # Show camera input when user clicks 'Take a Photo'
+                picture = st.camera_input("Camera Window")
 
+                # Step 2: If the user takes a picture
                 if picture:
                     image = Image.open(picture)
                     st.image(image, caption="Captured Prescription", use_column_width=True)
                     
+                    # Step 3: Extract text after picture is captured
                     if st.button("Extract Text from Photo"):
                         extracted_text = extract_text_from_image(image)
                         st.subheader("Extracted Text from Prescription")
