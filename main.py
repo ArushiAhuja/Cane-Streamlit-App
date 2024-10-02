@@ -57,7 +57,7 @@ st.title("Cane: A Medical Prescription Tracker")
 st.subheader("Designed to help elders and disabled individuals manage their prescriptions effortlessly.")
 
 # Add logo (you need to upload your logo image in the same directory as the app)
-st.image("logo.png", caption="Cane: Your Trusted Prescription Manager", width=200)
+st.image("Cane.png", caption="Cane: Your Trusted Prescription Manager", width=200)
 
 # User Authentication: Sign-up or Login
 st.sidebar.title("Login/Sign-up")
