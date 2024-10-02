@@ -5,7 +5,7 @@ from PIL import Image
 import re
 import csv
 import os
-import time  # To simulate loading
+import time  # For adding the loading indicator
 
 # Load medicine dataset
 meds_data = pd.read_csv('meds.csv')
@@ -35,36 +35,27 @@ def verify_user(username, password):
 
 # Function to extract text from images
 def extract_text_from_image(image):
-    # Use Tesseract to extract text from the image
     text = pytesseract.image_to_string(image)
     return text
 
 # Function to match extracted text with medicine names in dataset
 def identify_medicines_in_text(text):
-    # Extract medicine names from the dataset
     medicine_names = meds_data['Name'].values
     matched_medicines = []
-    
-    # Search for each medicine name in the extracted text
     for med in medicine_names:
         if re.search(r'\b' + re.escape(med) + r'\b', text, re.IGNORECASE):
             matched_medicines.append(med)
-    
     return matched_medicines
 
-# Streamlit app layout
+# Main App Code
 st.title("Cane: Medical Prescription Tracker")
 
-# Add description text
-st.markdown("""
-**Welcome to Cane!** This app helps elders and disabled individuals track their medical prescriptions easily. 
-Upload a prescription image or take a picture, and the app will extract the text and identify the medicines for you.
-""")
-
-# Add logo
-logo_path = "Cane.png"  # Ensure this file is uploaded to your GitHub repository
+# Adding the logo
+logo_path = 'Cane.png'
 if os.path.exists(logo_path):
-    st.image(logo_path, caption="Cane Logo")
+    st.image(logo_path, caption="Cane Logo", use_column_width=True)
+else:
+    st.write("Logo not found! Make sure 'cane_logo.png' is in the correct folder.")
 
 # User Authentication: Sign-up or Login
 st.sidebar.title("Login/Sign-up")
@@ -78,53 +69,36 @@ if choice == "Sign-up":
     if st.sidebar.button("Sign Up"):
         save_user_data(new_user, new_password)
         st.sidebar.success("Account created successfully! Please login.")
-        
+
 if choice == "Login":
     st.sidebar.subheader("Login to Your Account")
     username = st.sidebar.text_input("Username")
     password = st.sidebar.text_input("Password", type='password')
-    
+
     if st.sidebar.button("Login"):
         if verify_user(username, password):
             st.sidebar.success("Logged in successfully!")
             
             # Upload prescription
             st.header("Upload Your Prescription")
-            uploaded_file = st.file_uploader("Upload a prescription image (png, jpg, jpeg)", type=["png", "jpg", "jpeg"])
-            
-            # Option to take a picture using the webcam
-            st.header("Or Take a Picture")
-            camera_image = st.camera_input("Take a picture of your prescription")
+            uploaded_file = st.file_uploader("Upload a prescription image", type=["png", "jpg", "jpeg"])
 
-            image = None  # Placeholder for the image
-            
-            # If either file uploaded or camera image is taken
-            if uploaded_file:
+            if uploaded_file is not None:
+                # Display the uploaded image
                 image = Image.open(uploaded_file)
-                st.image(image, caption="Uploaded Prescription Image", use_column_width=True)
-            elif camera_image:
-                image = Image.open(camera_image)
-                st.image(image, caption="Captured Prescription Image", use_column_width=True)
-            
-            # Show "Extract Text" button only if an image is available
-            if image is not None:
-                extract_button = st.button("Extract Text")
+                st.image(image, caption="Uploaded Prescription", use_column_width=True)
 
-                # Handle text extraction on button click
-                if extract_button:
-                    with st.spinner("Processing the image and extracting text..."):
-                        time.sleep(2)  # Simulate a delay for loading
+                # Button to extract text
+                if st.button("Extract Text"):
+                    with st.spinner("Extracting text, please wait..."):
+                        time.sleep(2)  # Simulate the processing time
                         extracted_text = extract_text_from_image(image)
                     
-                    st.success("Text extraction complete!")
-                    
-                    # Display extracted text
                     st.subheader("Extracted Text from Prescription")
                     st.write(extracted_text)
                     
-                    # Identify medicines in the extracted text
+                    # Identify medicines
                     identified_medicines = identify_medicines_in_text(extracted_text)
-                    
                     st.subheader("Identified Medicines")
                     if identified_medicines:
                         st.write(identified_medicines)
@@ -132,4 +106,3 @@ if choice == "Login":
                         st.write("No medicines were identified in the prescription.")
         else:
             st.sidebar.error("Invalid Username or Password")
-
