@@ -108,10 +108,8 @@ if choice == "Login":
             
             # Show "Extract Text" button only if an image is available
             if image is not None:
-                extract_button = st.button("Extract Text")
-
-                # Handle text extraction on button click
-                if extract_button:
+                if st.button("Extract Text"):
+                    # Show loading spinner
                     with st.spinner("Processing the image and extracting text..."):
                         time.sleep(2)  # Simulate a delay for loading
                         extracted_text = extract_text_from_image(image)
