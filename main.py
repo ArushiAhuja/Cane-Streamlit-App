@@ -74,6 +74,10 @@ st.markdown("""
 **Welcome to Cane!** Upload or take a photo of your prescription, extract the text, and track your medications. 
 """)
 
+logo_path = "Cane.png"  # Ensure this file is uploaded to your GitHub repository
+if os.path.exists(logo_path):
+    st.image(logo_path, caption="Cane Logo")
+
 st.sidebar.title("Login/Sign-up")
 choice = st.sidebar.selectbox("Login or Sign-up", ["Login", "Sign-up"])
 
