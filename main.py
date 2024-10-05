@@ -5,8 +5,7 @@ from PIL import Image
 import re
 import csv
 import os
-import cv2
-from streamlit_webrtc import webrtc_streamer  # For camera streaming
+import time
 
 # Load medicine dataset
 meds_data = pd.read_csv('meds.csv')
@@ -36,31 +35,17 @@ def verify_user(username, password):
 
 # Function to extract text from images
 def extract_text_from_image(image):
-    # Use Tesseract to extract text from the image
     text = pytesseract.image_to_string(image)
     return text
 
-# Function to match extracted text with medicine names in the dataset
+# Function to match extracted text with medicine names in dataset
 def identify_medicines_in_text(text):
-    # Extract medicine names from the dataset
     medicine_names = meds_data['Name'].values
     matched_medicines = []
-    
-    # Search for each medicine name in the extracted text
     for med in medicine_names:
         if re.search(r'\b' + re.escape(med) + r'\b', text, re.IGNORECASE):
             matched_medicines.append(med)
-    
     return matched_medicines
-
-# Function to capture image from webcam
-def capture_image():
-    webrtc_ctx = webrtc_streamer(key="camera")
-    if webrtc_ctx.video_receiver:
-        frame = webrtc_ctx.video_receiver.get_frame()
-        img = frame.to_ndarray(format="bgr24")
-        return Image.fromarray(img)
-    return None
 
 # Streamlit app layout
 st.title("Cane: Medical Prescription Tracker")
@@ -88,7 +73,7 @@ if choice == "Sign-up":
     if st.sidebar.button("Sign Up"):
         save_user_data(new_user, new_password)
         st.sidebar.success("Account created successfully! Please login.")
-        
+
 if choice == "Login":
     st.sidebar.subheader("Login to Your Account")
     username = st.sidebar.text_input("Username")
@@ -98,44 +83,36 @@ if choice == "Login":
         if verify_user(username, password):
             st.sidebar.success("Logged in successfully!")
             
-            # Upload prescription
-            st.header("Upload Your Prescription")
-            uploaded_file = st.file_uploader("Upload a prescription image or PDF", type=["png", "jpg", "jpeg", "pdf"])
-            
-            # Option to take a picture using the webcam
-            if st.button("Take a picture"):
-                image_from_camera = capture_image()
-                if image_from_camera is not None:
-                    st.image(image_from_camera, caption="Captured Image")
-                    extracted_text = extract_text_from_image(image_from_camera)
+            # Upload prescription or capture image
+            st.header("Upload or Capture Your Prescription Image")
+            uploaded_file = st.file_uploader("Upload an image (png, jpg, jpeg)", type=["png", "jpg", "jpeg"])
+            camera_image = st.camera_input("Or take a picture")
+
+            # Process uploaded or captured image
+            image = uploaded_file or camera_image
+            if image:
+                image = Image.open(image)
+                st.image(image, caption="Uploaded/Captured Prescription Image", use_column_width=True)
+                
+                # Show "Extract Text" button after an image is uploaded
+                if st.button("Extract Text"):
+                    # Show loading spinner while processing
+                    with st.spinner("Extracting text..."):
+                        time.sleep(2)  # Simulate loading time
+                        extracted_text = extract_text_from_image(image)
                     
+                    # Display extracted text
+                    st.success("Text extraction complete!")
                     st.subheader("Extracted Text from Prescription")
                     st.write(extracted_text)
                     
+                    # Identify medicines in the extracted text
                     identified_medicines = identify_medicines_in_text(extracted_text)
+                    
                     st.subheader("Identified Medicines")
                     if identified_medicines:
                         st.write(identified_medicines)
                     else:
-                        st.write("No medicines were identified.")
-            
-            if uploaded_file is not None:
-                # Convert uploaded file to an image for Tesseract
-                image = Image.open(uploaded_file)
-                st.image(image, caption="Uploaded Prescription Image", use_column_width=True)
-                
-                extracted_text = extract_text_from_image(image)
-                
-                st.subheader("Extracted Text from Prescription")
-                st.write(extracted_text)
-                
-                # Identify medicines in the extracted text
-                identified_medicines = identify_medicines_in_text(extracted_text)
-                
-                st.subheader("Identified Medicines")
-                if identified_medicines:
-                    st.write(identified_medicines)
-                else:
-                    st.write("No medicines were identified in the prescription.")
+                        st.write("No medicines identified in the prescription.")
         else:
             st.sidebar.error("Invalid Username or Password")
