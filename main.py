@@ -5,7 +5,7 @@ from PIL import Image
 import re
 import csv
 import os
-import time
+import time  # To simulate loading
 
 # Load medicine dataset
 meds_data = pd.read_csv('meds.csv')
@@ -42,26 +42,44 @@ def extract_text_from_image(image):
 def identify_medicines_in_text(text):
     medicine_names = meds_data['Name'].values
     matched_medicines = []
+    
     for med in medicine_names:
         if re.search(r'\b' + re.escape(med) + r'\b', text, re.IGNORECASE):
             matched_medicines.append(med)
+    
     return matched_medicines
+
+# Function to save prescription data for the user
+def save_prescription(username, extracted_text):
+    if not os.path.exists('prescriptions.csv'):
+        with open('prescriptions.csv', 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['Username', 'PrescriptionText'])
+            writer.writerow([username, extracted_text])
+    else:
+        with open('prescriptions.csv', 'a', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([username, extracted_text])
+
+# Function to retrieve previous prescriptions for a user
+def get_previous_prescriptions(username):
+    if not os.path.exists('prescriptions.csv'):
+        return []
+    prescriptions = []
+    with open('prescriptions.csv', 'r') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            if row['Username'] == username:
+                prescriptions.append(row['PrescriptionText'])
+    return prescriptions
 
 # Streamlit app layout
 st.title("Cane: Medical Prescription Tracker")
 
-# Add description text
 st.markdown("""
-**Welcome to Cane!** This app helps elders and disabled individuals track their medical prescriptions easily. 
-Upload a prescription image or take a picture, and the app will extract the text and identify the medicines for you.
+**Welcome to Cane!** Upload or take a photo of your prescription, extract the text, and track your medications. 
 """)
 
-# Add logo
-logo_path = "Cane.png"  # Ensure this file is uploaded to your GitHub repository
-if os.path.exists(logo_path):
-    st.image(logo_path, caption="Cane Logo")
-
-# User Authentication: Sign-up or Login
 st.sidebar.title("Login/Sign-up")
 choice = st.sidebar.selectbox("Login or Sign-up", ["Login", "Sign-up"])
 
@@ -82,37 +100,53 @@ if choice == "Login":
     if st.sidebar.button("Login"):
         if verify_user(username, password):
             st.sidebar.success("Logged in successfully!")
-            
-            # Upload prescription or capture image
-            st.header("Upload or Capture Your Prescription Image")
-            uploaded_file = st.file_uploader("Upload an image (png, jpg, jpeg)", type=["png", "jpg", "jpeg"])
-            camera_image = st.camera_input("Or take a picture")
 
-            # Process uploaded or captured image
-            image = uploaded_file or camera_image
+            # Display previous prescriptions
+            st.header("Previous Prescriptions")
+            previous_prescriptions = get_previous_prescriptions(username)
+            if previous_prescriptions:
+                for idx, prescription in enumerate(previous_prescriptions, start=1):
+                    st.subheader(f"Prescription {idx}")
+                    st.text(prescription)
+            else:
+                st.write("No previous prescriptions found.")
+            
+            # Upload prescription
+            st.header("Upload or Take a Picture of Your Prescription")
+            uploaded_file = st.file_uploader("Upload an image (png, jpg, jpeg)", type=["png", "jpg", "jpeg"])
+            camera_image = st.camera_input("Take a picture of your prescription")
+
+            image = None
+            if uploaded_file:
+                image = Image.open(uploaded_file)
+                st.image(image, caption="Uploaded Prescription", use_column_width=True)
+            elif camera_image:
+                image = Image.open(camera_image)
+                st.image(image, caption="Captured Prescription", use_column_width=True)
+            
             if image:
-                image = Image.open(image)
-                st.image(image, caption="Uploaded/Captured Prescription Image", use_column_width=True)
-                
-                # Show "Extract Text" button after an image is uploaded
+                # Extract text from image when button is clicked
                 if st.button("Extract Text"):
-                    # Show loading spinner while processing
-                    with st.spinner("Extracting text..."):
-                        time.sleep(2)  # Simulate loading time
+                    with st.spinner("Processing the image and extracting text..."):
+                        time.sleep(2)
                         extracted_text = extract_text_from_image(image)
-                    
-                    # Display extracted text
-                    st.success("Text extraction complete!")
-                    st.subheader("Extracted Text from Prescription")
-                    st.write(extracted_text)
-                    
-                    # Identify medicines in the extracted text
-                    identified_medicines = identify_medicines_in_text(extracted_text)
-                    
-                    st.subheader("Identified Medicines")
-                    if identified_medicines:
-                        st.write(identified_medicines)
-                    else:
-                        st.write("No medicines identified in the prescription.")
+                        st.success("Text extraction complete!")
+                        
+                        # Show extracted text in a text box for editing
+                        st.subheader("Extracted Text (You can edit it)")
+                        edited_text = st.text_area("Edit the extracted text:", extracted_text)
+
+                        # Save the extracted and edited text
+                        if st.button("Save Prescription"):
+                            save_prescription(username, edited_text)
+                            st.success("Prescription saved successfully!")
+                            
+                        # Identify medicines in the extracted text
+                        st.subheader("Identified Medicines")
+                        identified_medicines = identify_medicines_in_text(edited_text)
+                        if identified_medicines:
+                            st.write(identified_medicines)
+                        else:
+                            st.write("No medicines identified in the prescription.")
         else:
             st.sidebar.error("Invalid Username or Password")
