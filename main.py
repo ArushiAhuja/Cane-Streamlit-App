@@ -5,7 +5,6 @@ from PIL import Image
 import re
 import csv
 import os
-import time  # To simulate loading
 
 # Load medicine dataset
 meds_data = pd.read_csv('meds.csv')
@@ -80,10 +79,6 @@ st.markdown("""
 **Welcome to Cane!** Upload or take a photo of your prescription, extract the text, and track your medications. 
 """)
 
-logo_path = "Cane.png"  # Ensure this file is uploaded to your GitHub repository
-if os.path.exists(logo_path):
-    st.image(logo_path, caption="Cane Logo")
-
 st.sidebar.title("Login/Sign-up")
 choice = st.sidebar.selectbox("Login or Sign-up", ["Login", "Sign-up"])
 
@@ -105,6 +100,10 @@ if choice == "Login":
         if verify_user(username, password):
             st.sidebar.success("Logged in successfully!")
 
+            # Store image upload state
+            if 'image' not in st.session_state:
+                st.session_state['image'] = None
+
             # Display previous prescriptions
             st.header("Previous Prescriptions")
             previous_prescriptions = get_previous_prescriptions(username)
@@ -120,37 +119,34 @@ if choice == "Login":
             uploaded_file = st.file_uploader("Upload an image (png, jpg, jpeg)", type=["png", "jpg", "jpeg"])
             camera_image = st.camera_input("Take a picture of your prescription")
 
-            image = None
             if uploaded_file:
-                image = Image.open(uploaded_file)
-                st.image(image, caption="Uploaded Prescription", use_column_width=True)
+                st.session_state['image'] = Image.open(uploaded_file)
+                st.image(st.session_state['image'], caption="Uploaded Prescription", use_column_width=True)
             elif camera_image:
-                image = Image.open(camera_image)
-                st.image(image, caption="Captured Prescription", use_column_width=True)
-            
-            if image:
-                # Extract text from image when button is clicked
-                if st.button("Extract Text"):
-                    with st.spinner("Processing the image and extracting text..."):
-                        time.sleep(2)
-                        extracted_text = extract_text_from_image(image)
-                        st.success("Text extraction complete!")
-                        
-                        # Show extracted text in a text box for editing
-                        st.subheader("Extracted Text (You can edit it)")
-                        edited_text = st.text_area("Edit the extracted text:", extracted_text)
+                st.session_state['image'] = Image.open(camera_image)
+                st.image(st.session_state['image'], caption="Captured Prescription", use_column_width=True)
 
-                        # Save the extracted and edited text
-                        if st.button("Save Prescription"):
-                            save_prescription(username, edited_text)
-                            st.success("Prescription saved successfully!")
-                            
-                        # Identify medicines in the extracted text
-                        st.subheader("Identified Medicines")
-                        identified_medicines = identify_medicines_in_text(edited_text)
-                        if identified_medicines:
-                            st.write(identified_medicines)
-                        else:
-                            st.write("No medicines identified in the prescription.")
+            # Ensure the Extract Text button only appears after an image is uploaded
+            if st.session_state['image']:
+                if st.button("Extract Text"):
+                    extracted_text = extract_text_from_image(st.session_state['image'])
+                    st.success("Text extraction complete!")
+
+                    # Show extracted text in a text box for editing
+                    st.subheader("Extracted Text (You can edit it)")
+                    edited_text = st.text_area("Edit the extracted text:", extracted_text)
+
+                    # Save the extracted and edited text
+                    if st.button("Save Prescription"):
+                        save_prescription(username, edited_text)
+                        st.success("Prescription saved successfully!")
+                        
+                    # Identify medicines in the extracted text
+                    st.subheader("Identified Medicines")
+                    identified_medicines = identify_medicines_in_text(edited_text)
+                    if identified_medicines:
+                        st.write(identified_medicines)
+                    else:
+                        st.write("No medicines identified in the prescription.")
         else:
             st.sidebar.error("Invalid Username or Password")
