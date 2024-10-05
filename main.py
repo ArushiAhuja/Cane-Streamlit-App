@@ -72,7 +72,7 @@ Upload a prescription image or take a picture, and the app will extract the text
 """)
 
 # Add logo
-logo_path = "cane_logo.png"  # Ensure this file is uploaded to your GitHub repository
+logo_path = "Cane.png"  # Ensure this file is uploaded to your GitHub repository
 if os.path.exists(logo_path):
     st.image(logo_path, caption="Cane Logo")
 
