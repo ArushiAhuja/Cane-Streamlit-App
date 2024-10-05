@@ -137,4 +137,19 @@ if choice == "Login":
             # Show extracted text in a text area (editable)
             if st.session_state['extracted_text']:
                 st.subheader("Extracted Text (You can edit it)")
-                edited_text = st.text_area("Edit the extracted t
+                edited_text = st.text_area("Edit the extracted text:", st.session_state['extracted_text'])
+
+                # Save the extracted and edited text
+                if st.button("Save Prescription"):
+                    save_prescription(username, edited_text)
+                    st.success("Prescription saved successfully!")
+                    
+                # Identify medicines in the extracted text
+                st.subheader("Identified Medicines")
+                identified_medicines = identify_medicines_in_text(edited_text)
+                if identified_medicines:
+                    st.write(identified_medicines)
+                else:
+                    st.write("No medicines identified in the prescription.")
+        else:
+            st.sidebar.error("Invalid Username or Password")
