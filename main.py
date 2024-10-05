@@ -73,8 +73,7 @@ st.title("Cane: Medical Prescription Tracker")
 st.markdown("""
 **Welcome to Cane!** Upload or take a photo of your prescription, extract the text, and track your medications. 
 """)
-
-logo_path = "Cane.png"  # Ensure this file is uploaded to your GitHub repository
+logo_path = "cane_logo.png"  # Ensure this file is uploaded to your GitHub repository
 if os.path.exists(logo_path):
     st.image(logo_path, caption="Cane Logo")
 
@@ -115,13 +114,15 @@ if choice == "Login":
             else:
                 st.write("No previous prescriptions found.")
 
-            # Extract Text button is visible immediately
+            # Extract Text button is always visible
             st.header("Upload or Take a Picture of Your Prescription")
-            
+
+            # Step 1: Show the image upload and camera input options
             st.markdown("### Step 1: Upload an image or take a photo")
             uploaded_file = st.file_uploader("Upload an image (png, jpg, jpeg)", type=["png", "jpg", "jpeg"])
             camera_image = st.camera_input("Take a picture of your prescription")
 
+            # Check if an image is uploaded or taken
             if uploaded_file:
                 st.session_state['image'] = Image.open(uploaded_file)
                 st.image(st.session_state['image'], caption="Uploaded Prescription", use_column_width=True)
@@ -129,16 +130,20 @@ if choice == "Login":
                 st.session_state['image'] = Image.open(camera_image)
                 st.image(st.session_state['image'], caption="Captured Prescription", use_column_width=True)
 
-            # Extract Text button (always visible)
-            if st.button("Extract Text"):
-                if st.session_state['image']:
-                    # Simulate loading with a spinner
+            # Step 2: Extract Text button logic
+            extract_button = st.button("Extract Text")
+            
+            # Avoid page redirection by handling extract button action in same page
+            if extract_button:
+                if st.session_state['image'] is not None:
                     with st.spinner("Extracting text, please wait..."):
                         time.sleep(2)  # Simulate delay for text extraction
                         st.session_state['extracted_text'] = extract_text_from_image(st.session_state['image'])
                     st.success("Text extraction complete!")
-
-            # Show extracted text in a text area (editable)
+                else:
+                    st.warning("Please upload an image or take a photo first.")
+            
+            # Step 3: Show extracted text in an editable box
             if st.session_state['extracted_text']:
                 st.subheader("Extracted Text (You can edit it)")
                 edited_text = st.text_area("Edit the extracted text:", st.session_state['extracted_text'])
