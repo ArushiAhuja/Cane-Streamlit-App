@@ -1,6 +1,0 @@
-streamlit
-pandas
-Pillow
-easyocr
-pytesseract
-
