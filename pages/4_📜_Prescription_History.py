@@ -1,23 +1,16 @@
 import streamlit as st
-import os
-import pandas as pd
+import hashlib
 
-# Prescription History - Page 4
-def prescription_history():
-    st.title("Prescription History")
+st.title("Prescription History")
 
-    # Check if the prescription file exists
-    if os.path.exists("prescriptions.csv"):
-        # Load the prescriptions
-        prescriptions = pd.read_csv("prescriptions.csv")
+# Simulate a stored prescription history (replace this with actual saved data)
+prescriptions = st.session_state.get('prescriptions', [])
 
-        if not prescriptions.empty:
-            # Display the stored prescriptions
-            st.subheader("Your Prescriptions:")
-            st.dataframe(prescriptions)
-        else:
-            # If the file exists but is empty
-            st.subheader("No prescriptions stored yet.")
-    else:
-        # If the file does not exist
-        st.subheader("No prescriptions stored yet.")
+if not prescriptions:
+    st.write("No prescriptions stored yet.")
+else:
+    for prescription in prescriptions:
+        st.image(prescription["name"], caption=prescription["name"])
+        st.write("Encrypted Text:")
+        encrypted_text = hashlib.sha256(prescription["text"].encode()).hexdigest()
+        st.code(encrypted_text)
