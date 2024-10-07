@@ -67,4 +67,3 @@ if uploaded_file is not None:
         st.success("Prescription saved successfully!")
 else:
     st.write("Please upload a file to proceed.")
-    st.write("Please upload a file to proceed.")
