@@ -1,8 +1,24 @@
 import streamlit as st
 import pytesseract
+import zipfile
+import os
+import shutil
 from PIL import Image
 import io
 import time
+
+# Step 1: Path to the Tesseract zip file in your repo
+tesseract_zip_path = 'tesseract.zip'  # Update this to the correct path in your repo
+
+# Step 2: Extract the zip file to a temporary directory if not already extracted
+tesseract_extracted_dir = '/tmp/tesseract'
+if not os.path.exists(tesseract_extracted_dir):
+    with zipfile.ZipFile(tesseract_zip_path, 'r') as zip_ref:
+        zip_ref.extractall(tesseract_extracted_dir)
+
+# Step 3: Set the Tesseract executable path
+tesseract_cmd_path = os.path.join(tesseract_extracted_dir, 'tesseract.exe')
+pytesseract.pytesseract.tesseract_cmd = tesseract_cmd_path
 
 # Initialize prescription history if not already initialized
 if 'prescriptions' not in st.session_state:
