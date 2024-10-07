@@ -1,7 +1,8 @@
 import streamlit as st
 
-# Simulate a simple user database with a dictionary for demo purposes
-users_db = {}
+# Initialize users database in session state if not already done
+if 'users_db' not in st.session_state:
+    st.session_state['users_db'] = {}
 
 st.title("Welcome to Cane")
 
@@ -14,8 +15,10 @@ with login_col:
     login_password = st.text_input("Login Password", placeholder="Enter your password", type="password")
     
     if st.button("Log In"):
-        if login_username in users_db and users_db[login_username] == login_password:
+        # Check if username exists and password is correct
+        if login_username in st.session_state['users_db'] and st.session_state['users_db'][login_username] == login_password:
             st.success(f"Logged in as {login_username}")
+            st.session_state['logged_in_user'] = login_username  # Save logged in user in session state
         else:
             st.error("Invalid username or password")
 
@@ -26,8 +29,10 @@ with signup_col:
     signup_password = st.text_input("Sign Up Password", placeholder="Create a password", type="password")
     
     if st.button("Sign Up"):
-        if signup_username in users_db:
+        # Check if the username already exists
+        if signup_username in st.session_state['users_db']:
             st.error("Username already exists. Try logging in.")
         else:
-            users_db[signup_username] = signup_password
+            # Add new user to session state
+            st.session_state['users_db'][signup_username] = signup_password
             st.success(f"Account created for {signup_username}. You can now log in.")
