@@ -6,9 +6,13 @@ from gtts import gTTS
 import io
 import time
 
+# Set the Tesseract executable path
+pytesseract.pytesseract.tesseract_cmd = r'C:\Users\Windows 10 Pro\Downloads\tesseract-ocr-w64-setup-5.4.0.20240606 (1).exe'
+
 # Initialize prescription history if not already initialized
 if 'prescriptions' not in st.session_state:
     st.session_state['prescriptions'] = []
+
 st.title("Upload and Extract Prescription")
 
 # File uploader for image or PDF
@@ -19,6 +23,7 @@ if uploaded_file is not None:
         # Show uploaded image
         image = Image.open(uploaded_file)
         st.image(image, caption="Uploaded Prescription", use_column_width=True)
+
         # Extract text from prescription
         st.write("Extracting text...")
         with st.spinner("Processing..."):
@@ -29,6 +34,7 @@ if uploaded_file is not None:
             else:
                 st.success("Text extraction complete!")
                 st.text_area("Extracted Text", extracted_text)
+
         # Audio conversion
         st.write("Convert extracted text to audio:")
         if st.button("Convert to Audio"):
@@ -36,6 +42,7 @@ if uploaded_file is not None:
             audio_file = io.BytesIO()
             tts.write_to_fp(audio_file)
             st.audio(audio_file, format='audio/mp3')
+
         # Text matching using meds.csv
         st.write("Matching extracted text with the medication dataset...")
         meds = pd.read_csv('meds.csv')  # Load the meds dataset
@@ -48,16 +55,7 @@ if uploaded_file is not None:
     
     except Exception as e:
         st.error(f"An error occurred while processing the file: {e}")
-    # Show uploaded image
-    image = Image.open(uploaded_file)
-    st.image(image, caption="Uploaded Prescription", use_column_width=True)
-    # Extract text from prescription
-    st.write("Extracting text...")
-    with st.spinner("Processing..."):
-        time.sleep(2)  # Simulate processing time
-        extracted_text = pytesseract.image_to_string(image)
-        st.success("Text extraction complete!")
-        st.text_area("Extracted Text", extracted_text)
+
     # Add a Save button to store the prescription to history
     if st.button("Save Prescription"):
         st.session_state['prescriptions'].append({
@@ -65,5 +63,6 @@ if uploaded_file is not None:
             "text": extracted_text
         })
         st.success("Prescription saved successfully!")
+
 else:
     st.write("Please upload a file to proceed.")
