@@ -7,7 +7,7 @@ import io
 import time
 
 # Set the Tesseract executable path
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR'
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 # Initialize prescription history if not already initialized
 if 'prescriptions' not in st.session_state:
