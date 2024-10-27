@@ -1,11 +1,19 @@
 import streamlit as st
+from datetime import datetime
 
 st.title("Profile Setup")
 
 st.write("Please provide your details to complete your profile setup.")
 
 gender = st.selectbox("Gender", ["Female", "Male", "Other"])
-dob = st.date_input("Date of Birth")
+
+# Define the range for the date input
+min_date = datetime(1920, 1, 1)
+max_date = datetime(2024, 12, 31)
+
+# Add the date input with the specified range
+dob = st.date_input("Date of Birth", min_value=min_date, max_value=max_date)
+
 conditions = st.multiselect("Do you have any of the following conditions?", 
                             ["Diabetes", "Hypertension", "Arthritis", "Asthma", "Other (Specify)"])
 disabilities = st.multiselect("Do you have any disabilities?", 
