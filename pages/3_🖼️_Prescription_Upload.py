@@ -6,6 +6,8 @@ from gtts import gTTS
 import io
 import time
 import os
+from pdf2image import convert_from_path
+import fitz  # PyMuPDF
 
 # Set the Tesseract path
 tesseract_path = os.path.join(os.path.dirname(__file__), 'tesseract', 'tesseract.exe')
@@ -20,22 +22,41 @@ st.title("Upload and Extract Prescription")
 # File uploader for image or PDF
 uploaded_file = st.file_uploader("Upload Prescription (PDF, JPEG, PNG)", type=["pdf", "jpeg", "png"])
 
+def extract_text_from_image(image):
+    """Extract text from a single image."""
+    return pytesseract.image_to_string(image)
+
+def extract_text_from_pdf(pdf_file):
+    """Convert PDF to images and extract text from each image."""
+    text = ""
+    images = convert_from_path(pdf_file)
+    for img in images:
+        text += extract_text_from_image(img)
+    return text
+
 if uploaded_file is not None:
     try:
-        # Show uploaded image
-        image = Image.open(uploaded_file)
-        st.image(image, caption="Uploaded Prescription", use_column_width=True)
-        
-        # Extract text from prescription
-        st.write("Extracting text...")
-        with st.spinner("Processing..."):
-            time.sleep(2)  # Simulate processing time
-            extracted_text = pytesseract.image_to_string(image)
-            if extracted_text.strip() == "":
-                st.warning("No text found in the uploaded image.")
-            else:
-                st.success("Text extraction complete!")
-                st.text_area("Extracted Text", extracted_text)
+        extracted_text = ""
+        if uploaded_file.type == "application/pdf":
+            with st.spinner("Processing PDF..."):
+                time.sleep(2)  # Simulate processing time
+                pdf_path = os.path.join(os.getcwd(), uploaded_file.name)
+                with open(pdf_path, "wb") as f:
+                    f.write(uploaded_file.getbuffer())
+                extracted_text = extract_text_from_pdf(pdf_path)
+                os.remove(pdf_path)  # Clean up the file after processing
+        else:
+            image = Image.open(uploaded_file)
+            st.image(image, caption="Uploaded Prescription", use_column_width=True)
+            with st.spinner("Processing image..."):
+                time.sleep(2)  # Simulate processing time
+                extracted_text = extract_text_from_image(image)
+
+        if extracted_text.strip() == "":
+            st.warning("No text found in the uploaded file.")
+        else:
+            st.success("Text extraction complete!")
+            st.text_area("Extracted Text", extracted_text)
         
         # Audio conversion
         st.write("Convert extracted text to audio:")
