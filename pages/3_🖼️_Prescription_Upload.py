@@ -86,4 +86,4 @@ if uploaded_file is not None:
     except Exception as e:
         st.error(f"An error occurred while processing the file: {e}")
 else:
-    st.write("Please upload a file to proceed.")
+    st.write("Please upload a file to proceed.") 
