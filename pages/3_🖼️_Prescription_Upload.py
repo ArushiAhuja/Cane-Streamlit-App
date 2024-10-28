@@ -1,9 +1,9 @@
+pip install pdf2image
 import streamlit as st
 from PIL import Image
 import pytesseract
 import pdf2image
 import os
-
 # Ensure pytesseract can find the tesseract executable
 pytesseract.pytesseract.tesseract_cmd = os.path.join(os.path.dirname(__file__), 'tesseract.exe')
 
