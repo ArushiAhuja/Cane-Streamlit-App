@@ -1,5 +1,5 @@
 import streamlit as st
-import pytesseract
+import easyocr
 from PIL import Image
 import pandas as pd
 from gtts import gTTS
@@ -8,10 +8,6 @@ import time
 import os
 from pdf2image import convert_from_path
 import fitz  # PyMuPDF
-
-# Set the Tesseract path
-tesseract_path = os.path.join(os.path.dirname(__file__), 'tesseract', 'tesseract.exe')
-pytesseract.pytesseract.tesseract_cmd = tesseract_path
 
 # Initialize prescription history if not already initialized
 if 'prescriptions' not in st.session_state:
@@ -23,11 +19,14 @@ st.title("Upload and Extract Prescription")
 uploaded_file = st.file_uploader("Upload Prescription (PDF, JPEG, PNG)", type=["pdf", "jpeg", "png"])
 
 def extract_text_from_image(image):
-    """Extract text from a single image."""
-    return pytesseract.image_to_string(image)
+    """Extract text from a single image using easyocr."""
+    reader = easyocr.Reader(['en'])  # Specify the language(s) you want to use
+    result = reader.readtext(image)
+    text = ' '.join([res[1] for res in result])
+    return text
 
 def extract_text_from_pdf(pdf_file):
-    """Convert PDF to images and extract text from each image."""
+    """Convert PDF to images and extract text from each image using easyocr."""
     text = ""
     images = convert_from_path(pdf_file)
     for img in images:
