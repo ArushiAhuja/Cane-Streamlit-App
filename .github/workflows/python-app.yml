@@ -24,6 +24,3 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt  # Ensure you have a requirements.txt file
 
-    - name: Run your script (optional)
-      run: |
-        python your_script.py  # Replace with the script you want to run
