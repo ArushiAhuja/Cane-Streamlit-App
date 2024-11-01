@@ -1,9 +1,6 @@
-streamlit==1.22.0
-easyocr==1.5.0
-Pillow==9.5.0
+torch>=2.2.0
+streamlit==1.39.0
+easyocr
 pandas>=2.0.3
-gtts==2.3.1
-pdf2image==1.16.0
-PyMuPDF==1.20.0
-torch==2.4.1
-torchvision==0.15.2  # Adjust if necessary based on PyTorch version compatibility
+gtts
+pdf2image
