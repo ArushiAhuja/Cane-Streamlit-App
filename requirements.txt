@@ -1,8 +1,8 @@
-streamlit==1.39.0
+streamlit
 easyocr
-pillow
-pandas>=2.0.3
+Pillow
+pandas
 gtts
 pdf2image
-pymupdf  # for fitz
-sqlite3  # for SQL functionality
+PyMuPDF
+sqlite3  # SQLite is included in Python's standard library, but if needed
