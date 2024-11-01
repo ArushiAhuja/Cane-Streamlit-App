@@ -29,7 +29,7 @@ def validate_user(username, password):
     c.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, hash_password(password)))
     return c.fetchone() is not None
 
-st.title("User Login")
+st.title("User Authentication")
 
 # Registration section
 st.subheader("Register")
@@ -55,6 +55,8 @@ if st.button("Login"):
     if validate_user(username_log, password_log):
         st.success("Login successful!")
         # Redirect to main app or perform actions upon successful login
+        st.session_state['username'] = username_log  # Store username in session state
+        st.write("Welcome, ", username_log)
     else:
         st.error("Invalid username or password.")
 
