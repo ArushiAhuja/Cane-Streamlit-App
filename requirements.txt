@@ -1,7 +1,8 @@
-torch>=2.2.0
 streamlit==1.39.0
 easyocr
+pillow
 pandas>=2.0.3
 gtts
 pdf2image
-pymupdf
+pymupdf  # for fitz
+sqlite3  # for SQL functionality
