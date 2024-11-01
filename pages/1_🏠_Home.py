@@ -1,63 +1,50 @@
 import streamlit as st
-import sqlite3
-import hashlib
 
-# Connect to SQLite database (it will create the database if it doesn't exist)
-conn = sqlite3.connect('users.db')
-c = conn.cursor()
+# Initialize users database and logged-in state in session state if not already done
+if 'users_db' not in st.session_state:
+    st.session_state['users_db'] = {}
 
-# Create users table if it doesn't exist
-c.execute('''
-    CREATE TABLE IF NOT EXISTS users (
-        username TEXT PRIMARY KEY,
-        password TEXT NOT NULL
-    )
-''')
-conn.commit()
+if 'logged_in_user' not in st.session_state:
+    st.session_state['logged_in_user'] = None
 
-# Function to hash passwords
-def hash_password(password):
-    return hashlib.sha256(password.encode()).hexdigest()
+st.title("Welcome to Cane")
 
-# Function to add a new user
-def add_user(username, password):
-    c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, hash_password(password)))
-    conn.commit()
+login_col, signup_col = st.columns(2)
 
-# Function to validate user credentials
-def validate_user(username, password):
-    c.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, hash_password(password)))
-    return c.fetchone() is not None
+# Function to log out user
+def log_out():
+    st.session_state['logged_in_user'] = None
+    st.success("Logged out successfully.")
 
-st.title("User Authentication")
+# If user is already logged in, show a logout button
+if st.session_state['logged_in_user']:
+    st.write(f"Logged in as {st.session_state['logged_in_user']}")
+    if st.button("Log Out"):
+        log_out()
+else:
+    # Login Section
+    with login_col:
+        st.subheader("Log In")
+        login_username = st.text_input("Login Username", placeholder="Enter your username")
+        login_password = st.text_input("Login Password", placeholder="Enter your password", type="password")
+        
+        if st.button("Log In"):
+            if login_username in st.session_state['users_db'] and st.session_state['users_db'][login_username] == login_password:
+                st.success(f"Logged in as {login_username}")
+                st.session_state['logged_in_user'] = login_username  # Save logged in user in session state
+            else:
+                st.error("Invalid username or password")
 
-# Registration section
-st.subheader("Register")
-username_reg = st.text_input("Username (Register)")
-password_reg = st.text_input("Password (Register)", type="password")
-
-if st.button("Register"):
-    if username_reg and password_reg:
-        try:
-            add_user(username_reg, password_reg)
-            st.success("User registered successfully!")
-        except sqlite3.IntegrityError:
-            st.error("Username already exists. Please choose a different one.")
-    else:
-        st.error("Please enter both username and password.")
-
-# Login section
-st.subheader("Login")
-username_log = st.text_input("Username (Login)")
-password_log = st.text_input("Password (Login)", type="password")
-
-if st.button("Login"):
-    if validate_user(username_log, password_log):
-        st.success("Login successful!")
-        # Redirect to main app or perform actions upon successful login
-        st.session_state['username'] = username_log  # Store username in session state
-        st.write("Welcome, ", username_log)
-    else:
-        st.error("Invalid username or password.")
-
-conn.close()
+    # Sign-Up Section
+    with signup_col:
+        st.subheader("Sign Up")
+        signup_username = st.text_input("Sign Up Username", placeholder="Create a username")
+        signup_password = st.text_input("Sign Up Password", placeholder="Create a password", type="password")
+        
+        if st.button("Sign Up"):
+            if signup_username in st.session_state['users_db']:
+                st.error("Username already exists. Try logging in.")
+            else:
+                # Add new user to session state
+                st.session_state['users_db'][signup_username] = signup_password
+                st.success(f"Account created for {signup_username}. You can now log in.")
