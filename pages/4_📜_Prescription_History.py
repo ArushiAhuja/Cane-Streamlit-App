@@ -10,7 +10,9 @@ if not prescriptions:
     st.write("No prescriptions stored yet.")
 else:
     for prescription in prescriptions:
-        st.image(prescription["name"], caption=prescription["name"])
+        st.write(f"Prescription Name: {prescription['name']}")
+        st.write("Extracted Text:")
+        st.text_area("Text", prescription["text"], height=200)
         st.write("Encrypted Text:")
         encrypted_text = hashlib.sha256(prescription["text"].encode()).hexdigest()
         st.code(encrypted_text)
