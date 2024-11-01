@@ -7,7 +7,7 @@ import io
 import time
 import os
 from pdf2image import convert_from_path
-import PyMuPDF
+import fitz 
 
 # Initialize prescription history if not already initialized
 if 'prescriptions' not in st.session_state:
