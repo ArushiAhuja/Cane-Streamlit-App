@@ -1,6 +1,6 @@
 import streamlit as st
 
-# Initialize users database and logged-in state in session state if not already done
+# create users database and logged-in state in session state if not already done
 if 'users_db' not in st.session_state:
     st.session_state['users_db'] = {}
 
