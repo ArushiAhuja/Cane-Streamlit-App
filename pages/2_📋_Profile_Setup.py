@@ -7,14 +7,14 @@ st.write("Please provide your details to complete your profile setup.")
 
 gender = st.selectbox("Gender", ["Female", "Male", "Other"])
 
-# Define the range for the date input
+
 min_date = datetime(1920, 1, 1)
 max_date = datetime.now()
 
-# Set a default date if needed
+
 default_date = datetime(2000, 1, 1)
 
-# Add the date input with the specified range
+
 dob = st.date_input("Date of Birth", value=default_date, min_value=min_date, max_value=max_date)
 
 conditions = st.multiselect("Do you have any of the following conditions?", 
