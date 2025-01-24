@@ -1,6 +1,6 @@
 import streamlit as st
 
-# create users database and logged-in state in session state if not already done
+
 if 'users_db' not in st.session_state:
     st.session_state['users_db'] = {}
 
@@ -11,18 +11,18 @@ st.title("Welcome to Cane")
 
 login_col, signup_col = st.columns(2)
 
-# Function to log out user
+
 def log_out():
     st.session_state['logged_in_user'] = None
     st.success("Logged out successfully.")
 
-# If user is already logged in, show a logout button
+
 if st.session_state['logged_in_user']:
     st.write(f"Logged in as {st.session_state['logged_in_user']}")
     if st.button("Log Out"):
         log_out()
 else:
-    # Login Section
+    
     with login_col:
         st.subheader("Log In")
         login_username = st.text_input("Login Username", placeholder="Enter your username")
@@ -35,7 +35,7 @@ else:
             else:
                 st.error("Invalid username or password")
 
-    # Sign-Up Section
+   
     with signup_col:
         st.subheader("Sign Up")
         signup_username = st.text_input("Sign Up Username", placeholder="Create a username")
@@ -45,6 +45,6 @@ else:
             if signup_username in st.session_state['users_db']:
                 st.error("Username already exists. Try logging in.")
             else:
-                # Add new user to session state
+                
                 st.session_state['users_db'][signup_username] = signup_password
                 st.success(f"Account created for {signup_username}. You can now log in.")
