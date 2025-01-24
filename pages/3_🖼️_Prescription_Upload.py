@@ -8,18 +8,18 @@ import time
 import os
 from pdf2image import convert_from_path
 
-# Initialize prescription history if not already initialized
+
 if 'prescriptions' not in st.session_state:
     st.session_state['prescriptions'] = []
 
 st.title("Upload and Extract Prescription")
 
-# File uploader for image or PDF (allowing multiple files)
+
 uploaded_files = st.file_uploader("Upload Prescription (PDF, JPEG, PNG)", type=["pdf", "jpeg", "png"], accept_multiple_files=True)
 
 def extract_text_from_image(image):
     """Extract text from a single image using easyocr."""
-    reader = easyocr.Reader(['en'])  # Specify the language(s) you want to use
+    reader = easyocr.Reader(['en'])  
     result = reader.readtext(image)
     text = ' '.join([res[1] for res in result])
     return text
@@ -42,7 +42,7 @@ if uploaded_files:
                     with open(pdf_path, "wb") as f:
                         f.write(uploaded_file.getbuffer())
                     extracted_text += extract_text_from_pdf(pdf_path) + "\n"
-                    os.remove(pdf_path)  # Clean up the file after processing
+                    os.remove(pdf_path)  
             else:
                 image = Image.open(uploaded_file)
                 st.image(image, caption=f"Uploaded Prescription: {uploaded_file.name}", use_column_width=True)
@@ -55,18 +55,18 @@ if uploaded_files:
             st.success("Text extraction complete!")
             st.text_area("Extracted Text", extracted_text)
             
-            # Audio conversion
+            
             st.write("Convert extracted text to audio:")
             if st.button("Convert to Audio"):
-                tts = gTTS(text=extracted_text, lang='en', slow=False)  # Set slow to False for natural pronunciation
+                tts = gTTS(text=extracted_text, lang='en', slow=False)  
                 audio_file = io.BytesIO()
                 tts.write_to_fp(audio_file)
                 st.audio(audio_file, format='audio/mp3')
             
-            # Input for naming the prescription
+            
             prescription_name = st.text_input("Name your Prescription:", "")
             
-            # Text matching using meds.csv
+            
             st.write("Matching extracted text with the medication dataset...")
             meds = pd.read_csv('meds.csv')  # Load the meds dataset
             matched_meds = meds[meds['Name'].apply(lambda x: any(term in extracted_text.split() for term in x.split()))]
@@ -75,7 +75,7 @@ if uploaded_files:
             else:
                 st.info("No medical terms found in the prescription. Showing the extracted text.")
             
-            # Save prescription to history with a name
+            
             if st.button("Save Prescription"):
                 if prescription_name.strip() == "":
                     st.warning("Please enter a name for your prescription before saving.")
