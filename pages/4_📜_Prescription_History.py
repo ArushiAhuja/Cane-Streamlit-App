@@ -3,7 +3,7 @@ import hashlib
 
 st.title("Prescription History")
 
-# Simulate a stored prescription history (replace this with actual saved data)
+
 prescriptions = st.session_state.get('prescriptions', [])
 
 if not prescriptions:
